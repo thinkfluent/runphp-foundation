@@ -2,12 +2,12 @@
 ARG PHP_EXT_ESSENTIAL="bcmath opcache mysqli pdo_mysql bz2 soap sockets zip"
 
 # Where do all the PHP extensions go?
-ARG PHP_EXT_FOLDER="/usr/local/lib/php/extensions/no-debug-non-zts-20190902/"
+ARG PHP_EXT_FOLDER="/usr/local/lib/php/extensions/no-debug-non-zts-20200930/"
 
 ARG TAG_NAME="dev-master"
 
 ################################################################################################################
-FROM php:7.4-apache as baseline
+FROM php:8.0-apache as baseline
 
 # Let's get up to date
 RUN apt-get update && apt-get -y upgrade
