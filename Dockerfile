@@ -7,7 +7,7 @@ ARG PHP_EXT_FOLDER="/usr/local/lib/php/extensions/no-debug-non-zts-20200930/"
 ARG TAG_NAME="dev-master"
 
 ################################################################################################################
-FROM php:8.0-apache as baseline
+FROM php:8.0.2-apache as core
 
 # Let's get up to date
 RUN apt-get update && apt-get -y upgrade
@@ -29,17 +29,15 @@ RUN apt-get install -y \
     libffi-dev \
     libpq-dev
 
-# Manifest contents needed for build & runtime
-COPY ./manifest /
 
 # TODO Consdier cleanup to reduce image size, apt-get clean etc.
-
 ################################################################################################################
-FROM baseline as builder
-ARG PHP_EXT_ESSENTIAL
+FROM core as slow-builder
 ARG PHP_EXT_FOLDER
 
-# Extensions that need building for fast Google APIs. This takes a while.
+# This takes a while, hence in it's own stage with no context dependancy
+
+# Extensions that need building for fast Google APIs.
 RUN pecl install grpc protobuf
 
 # Memcached & Redis
@@ -47,6 +45,21 @@ RUN pecl install memcached redis
 
 # Xdebug
 RUN pecl install xdebug
+
+# Purge extension debug strings (100MB becomes 8MB)
+# See https://github.com/docker-library/php/issues/297
+RUN ls -1 ${PHP_EXT_FOLDER}*.so | xargs strip --strip-debug
+
+################################################################################################################
+FROM core as baseline
+
+# Manifest contents needed for build & runtime
+COPY ./manifest /
+
+################################################################################################################
+FROM baseline as builder
+ARG PHP_EXT_ESSENTIAL
+ARG PHP_EXT_FOLDER
 
 # Install our desired extensions available from php base image
 RUN docker-php-ext-install -j$(nproc) ${PHP_EXT_ESSENTIAL}
@@ -62,14 +75,14 @@ RUN docker-php-source extract && \
     docker-php-source delete
 
 # XHProf/tideways
-RUN curl -Ls https://github.com/tideways/php-xhprof-extension/releases/download/v5.0.2/tideways-xhprof_5.0.2_amd64.deb \
-    -o /tmp/tideways-xhprof_5.0.2_amd64.deb && \
-    dpkg -i /tmp/tideways-xhprof_5.0.2_amd64.deb && \
-    mv /usr/lib/tideways_xhprof/tideways_xhprof-7.4.so ${PHP_EXT_FOLDER}/tideways_xhprof.so && \
-    rm -rf /tmp/tideways-xhprof_5.0.2_amd64.deb /usr/lib/tideways_xhprof
+RUN curl -Ls https://github.com/tideways/php-xhprof-extension/releases/download/v5.0.4/tideways-xhprof_5.0.4_amd64.deb \
+    -o /tmp/tideways-xhprof_5.0.4_amd64.deb && \
+    dpkg -i /tmp/tideways-xhprof_5.0.4_amd64.deb && \
+    mv /usr/lib/tideways_xhprof/tideways_xhprof-8.0.so ${PHP_EXT_FOLDER}tideways_xhprof.so && \
+    rm -rf /tmp/tideways-xhprof_5.0.4_amd64.deb /usr/lib/tideways_xhprof
 
 # opencensus, for Google Cloud Trace
-RUN pecl install opencensus-alpha
+# RUN pecl install opencensus-alpha
 
 # Build any remaining extensions
 RUN php /runphp-foundation/bin/install-all-missing-extensions.php
@@ -91,6 +104,7 @@ RUN chmod ugo+w /var/log
 RUN apt-get install dumb-init
 
 # Pull in all the built extensions
+COPY --from=slow-builder ${PHP_EXT_FOLDER}*.so ${PHP_EXT_FOLDER}
 COPY --from=builder ${PHP_EXT_FOLDER}*.so ${PHP_EXT_FOLDER}
 
 # Enable our base set of extensions (but not all)
