@@ -7,7 +7,7 @@ ARG PHP_EXT_FOLDER="/usr/local/lib/php/extensions/no-debug-non-zts-20190902/"
 ARG TAG_NAME="dev-master"
 
 ################################################################################################################
-FROM php:7.4-apache as baseline
+FROM php:7.4.15-apache as baseline
 
 # Let's get up to date
 RUN apt-get update && apt-get -y upgrade
@@ -62,11 +62,11 @@ RUN docker-php-source extract && \
     docker-php-source delete
 
 # XHProf/tideways
-RUN curl -Ls https://github.com/tideways/php-xhprof-extension/releases/download/v5.0.2/tideways-xhprof_5.0.2_amd64.deb \
-    -o /tmp/tideways-xhprof_5.0.2_amd64.deb && \
-    dpkg -i /tmp/tideways-xhprof_5.0.2_amd64.deb && \
+RUN curl -Ls https://github.com/tideways/php-xhprof-extension/releases/download/v5.0.4/tideways-xhprof_5.0.4_amd64.deb \
+    -o /tmp/tideways-xhprof_5.0.4_amd64.deb && \
+    dpkg -i /tmp/tideways-xhprof_5.0.4_amd64.deb && \
     mv /usr/lib/tideways_xhprof/tideways_xhprof-7.4.so ${PHP_EXT_FOLDER}/tideways_xhprof.so && \
-    rm -rf /tmp/tideways-xhprof_5.0.2_amd64.deb /usr/lib/tideways_xhprof
+    rm -rf /tmp/tideways-xhprof_5.0.4_amd64.deb /usr/lib/tideways_xhprof
 
 # opencensus, for Google Cloud Trace
 RUN pecl install opencensus-alpha
