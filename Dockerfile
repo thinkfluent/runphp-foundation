@@ -7,7 +7,7 @@ ARG PHP_EXT_FOLDER="/usr/local/lib/php/extensions/no-debug-non-zts-20200930/"
 ARG TAG_NAME="dev-master"
 
 ################################################################################################################
-FROM php:8.0.2-apache as core
+FROM php:8.0.17-apache as core
 
 # Let's get up to date
 RUN apt-get update && apt-get -y upgrade
@@ -38,7 +38,8 @@ ARG PHP_EXT_FOLDER
 # This takes a while, hence in it's own stage with no context dependancy
 
 # Extensions that need building for fast Google APIs.
-RUN pecl install grpc protobuf
+RUN pecl install grpc-1.45.0
+RUN pecl install protobuf-3.19.4
 
 # Memcached & Redis
 RUN pecl install memcached redis
@@ -75,6 +76,7 @@ RUN docker-php-source extract && \
     docker-php-source delete
 
 # XHProf/tideways
+# https://github.com/tideways/php-xhprof-extension/releases
 RUN curl -Ls https://github.com/tideways/php-xhprof-extension/releases/download/v5.0.4/tideways-xhprof_5.0.4_amd64.deb \
     -o /tmp/tideways-xhprof_5.0.4_amd64.deb && \
     dpkg -i /tmp/tideways-xhprof_5.0.4_amd64.deb && \
