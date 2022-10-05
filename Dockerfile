@@ -7,7 +7,7 @@ ARG PHP_EXT_FOLDER="/usr/local/lib/php/extensions/no-debug-non-zts-20190902/"
 ARG TAG_NAME="dev-master"
 
 ################################################################################################################
-FROM php:7.4.30-apache as baseline
+FROM php:7.4.32-apache as baseline
 
 # Let's get up to date
 RUN apt-get update && apt-get -y upgrade
@@ -41,9 +41,9 @@ ARG PHP_EXT_FOLDER
 
 # Extensions that need building for fast Google APIs. This takes a while.
 # https://pecl.php.net/package/grpc
-RUN pecl install grpc-1.48.1
+RUN pecl install grpc-1.49.0
 # https://pecl.php.net/package/protobuf
-RUN pecl install protobuf-3.21.6
+RUN pecl install protobuf-3.21.7
 
 # Memcached & Redis
 RUN pecl install memcached redis
