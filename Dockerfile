@@ -38,7 +38,7 @@ ARG PHP_EXT_FOLDER
 # This takes a while, hence in it's own stage with no context dependancy
 
 # Extensions that need building for fast Google APIs.
-RUN pecl install grpc-1.49.1
+RUN pecl install grpc-1.49.0
 RUN pecl install protobuf-3.21.7
 
 # Memcached & Redis
