@@ -7,7 +7,7 @@ ARG PHP_EXT_FOLDER="/usr/local/lib/php/extensions/no-debug-non-zts-20190902/"
 ARG TAG_NAME="dev-master"
 
 ################################################################################################################
-FROM php:7.4.32-apache as baseline
+FROM php:7.4.33-apache as baseline
 
 # Let's get up to date
 RUN apt-get update && apt-get -y upgrade
@@ -113,7 +113,8 @@ RUN sed -i 's/80/${PORT}/g' /etc/apache2/sites-available/000-default.conf /etc/a
 RUN a2enmod rewrite headers remoteip expires include brotli && \
     a2dismod -f autoindex && \
     a2dissite 000-default && \
-    a2ensite 000-runphp-core 001-runphp-foundation
+    a2ensite 000-runphp-core 001-runphp-foundation && \
+    a2enconf 000-logging
 
 ENV RUNPHP_FOUNDATION_VERSION=${TAG_NAME}
 
