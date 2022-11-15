@@ -1,6 +1,8 @@
-# Foundation Docker Image, PHP for Google Cloud Run Toolkit
+# Foundation Stage, PHP for Google Cloud Run Toolkit
 
 This is the baseline Docker image for the [runphp](https://github.com/thinkfluent/runphp) Serverless PHP Toolkit for Google Cloud Run.
+
+**All the documentation and guides [are here](https://github.com/thinkfluent/runphp)**
 
 ## Build
 Local builds can be performed as follows
