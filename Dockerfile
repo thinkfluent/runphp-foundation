@@ -2,12 +2,13 @@
 ARG PHP_EXT_ESSENTIAL="bcmath opcache mysqli pdo_mysql bz2 soap sockets zip"
 
 # Where do all the PHP extensions go?
+ARG BUILD_PHP_VER="7.4.33"
 ARG PHP_EXT_FOLDER="/usr/local/lib/php/extensions/no-debug-non-zts-20190902/"
 
 ARG TAG_NAME="dev-master"
 
 ################################################################################################################
-FROM php:7.4.33-apache as baseline
+FROM php:${BUILD_PHP_VER}-apache as baseline
 
 # Let's get up to date
 RUN apt-get update && apt-get -y upgrade
@@ -41,9 +42,9 @@ ARG PHP_EXT_FOLDER
 
 # Extensions that need building for fast Google APIs. This takes a while.
 # https://pecl.php.net/package/grpc
-RUN pecl install grpc-1.49.0
+RUN pecl install grpc-1.50.0
 # https://pecl.php.net/package/protobuf
-RUN pecl install protobuf-3.21.7
+RUN pecl install protobuf-3.21.9
 
 # Memcached & Redis
 RUN pecl install memcached redis
@@ -72,6 +73,7 @@ RUN curl -Ls https://github.com/tideways/php-xhprof-extension/releases/download/
     rm -rf /tmp/tideways-xhprof_5.0.4_amd64.deb /usr/lib/tideways_xhprof
 
 # opencensus, for Google Cloud Trace
+# https://pecl.php.net/package/opencensus
 RUN pecl install opencensus-alpha
 
 # Build any remaining extensions
