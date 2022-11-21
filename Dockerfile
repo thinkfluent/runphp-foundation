@@ -65,12 +65,8 @@ RUN docker-php-source extract && \
     make clean && \
     docker-php-source delete
 
-# XHProf/tideways
-RUN curl -Ls https://github.com/tideways/php-xhprof-extension/releases/download/v5.0.4/tideways-xhprof_5.0.4_amd64.deb \
-    -o /tmp/tideways-xhprof_5.0.4_amd64.deb && \
-    dpkg -i /tmp/tideways-xhprof_5.0.4_amd64.deb && \
-    mv /usr/lib/tideways_xhprof/tideways_xhprof-7.4.so ${PHP_EXT_FOLDER}/tideways_xhprof.so && \
-    rm -rf /tmp/tideways-xhprof_5.0.4_amd64.deb /usr/lib/tideways_xhprof
+# XHProf
+RUN pecl install xhprof
 
 # opencensus, for Google Cloud Trace
 # https://pecl.php.net/package/opencensus
@@ -105,7 +101,7 @@ RUN docker-php-ext-enable \
     memcached \
     redis \
     gd \
-    tideways_xhprof \
+    xhprof \
     ${PHP_EXT_ESSENTIAL}
 
 # Ensure we listen on the runtime $PORT value
