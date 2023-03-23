@@ -42,15 +42,15 @@ ARG PHP_EXT_FOLDER
 
 # Extensions that need building for fast Google APIs. This takes a while.
 # https://pecl.php.net/package/grpc
-RUN pecl install grpc-1.50.0
+RUN pecl install grpc-1.52.1
 # https://pecl.php.net/package/protobuf
-RUN pecl install protobuf-3.21.9
+RUN pecl install protobuf-3.22.1
 
 # Memcached & Redis
 RUN pecl install memcached redis
 
-# Xdebug
-RUN pecl install xdebug
+# Xdebug. Pinned version for PHP 7.x builds.
+RUN pecl install xdebug`php -r "echo PHP_MAJOR_VERSION < 8 ? '-3.1.5' : '';"`
 
 # Install our desired extensions available from php base image
 RUN docker-php-ext-install -j$(nproc) ${PHP_EXT_ESSENTIAL}
