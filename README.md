@@ -10,6 +10,6 @@ Local builds can be performed as follows
 ```bash
 ./build.sh -v 7.4.33 -t dev
 ./build.sh -v 8.0.28 -t dev
-./build.sh -v 8.1.18 -t dev
-./build.sh -v 8.2.5 -t dev
+./build.sh -v 8.1.19 -t dev
+./build.sh -v 8.2.6 -t dev
 ```
