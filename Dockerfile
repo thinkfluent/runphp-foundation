@@ -42,15 +42,15 @@ ARG PHP_EXT_FOLDER
 
 # Extensions that need building for fast Google APIs. This takes a while.
 # https://pecl.php.net/package/grpc
-RUN pecl install grpc-1.54.0
+RUN export MAKEFLAGS="-j $(nproc)" && pecl install grpc-1.55.0
 # https://pecl.php.net/package/protobuf
-RUN pecl install protobuf-3.22.3
+RUN export MAKEFLAGS="-j $(nproc)" && pecl install protobuf-3.23.1
 
 # Memcached & Redis
-RUN pecl install memcached redis
+RUN export MAKEFLAGS="-j $(nproc)" && pecl install memcached redis
 
 # Xdebug. Pinned version for PHP 7.x builds.
-RUN pecl install xdebug`php -r "echo PHP_MAJOR_VERSION < 8 ? '-3.1.5' : '';"`
+RUN export MAKEFLAGS="-j $(nproc)" && pecl install xdebug`php -r "echo PHP_MAJOR_VERSION < 8 ? '-3.1.5' : '';"`
 
 # Install our desired extensions available from php base image
 RUN docker-php-ext-install -j$(nproc) ${PHP_EXT_ESSENTIAL}
@@ -60,24 +60,25 @@ RUN docker-php-source extract && \
     cd /usr/src/php/ext/gd && \
     phpize && \
     ./configure --with-jpeg --with-webp --with-freetype && \
+    export MAKEFLAGS="-j $(nproc)" && \
     make && \
     make install && \
     make clean && \
     docker-php-source delete
 
 # XHProf
-RUN pecl install xhprof
+RUN export MAKEFLAGS="-j $(nproc)" && pecl install xhprof
 
 # opencensus, for Google Cloud Trace
 # https://pecl.php.net/package/opencensus
-RUN pecl install opencensus-alpha
+RUN export MAKEFLAGS="-j $(nproc)" && pecl install opencensus-alpha
 
 # Build any remaining extensions
 RUN php /runphp-foundation/bin/install-all-missing-extensions.php
 
 # Purge extension debug strings (100MB becomes 8MB)
 # See https://github.com/docker-library/php/issues/297
-RUN ls -1 ${PHP_EXT_FOLDER}*.so | xargs strip --strip-debug
+RUN ls -1 ${PHP_EXT_FOLDER}*.so | xargs strip --strip-all
 
 ################################################################################################################
 FROM baseline as runtime

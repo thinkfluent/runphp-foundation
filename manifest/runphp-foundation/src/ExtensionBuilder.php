@@ -34,8 +34,9 @@ class ExtensionBuilder extends Extensions
         // (5) install gap list.
         // We do this one at a time so we can have better visibility of failures
         // We also "ignore" failures - as we're trying to build as many extensions as we easily can
+        $int_procs = trim(exec('nproc'));
         foreach ($arr_to_install as $str_extension) {
-            $str_install_cmd = 'docker-php-ext-install ' . $str_extension;
+            $str_install_cmd = sprintf('docker-php-ext-install -j%d %s', $int_procs, $str_extension);
             echo PHP_EOL, str_repeat('-', 80), PHP_EOL;
             echo "Running: ", $str_install_cmd, PHP_EOL;
             system($str_install_cmd);
