@@ -18,6 +18,7 @@ RUN apt-get update && apt-get -y upgrade
 # Libraries we're going to need for development/compilation
 RUN apt-get install -y \
     libxml2-dev \
+    libyaml-dev \
     zlib1g-dev \
     libmemcached-dev \
     libbz2-dev \
@@ -40,11 +41,19 @@ FROM baseline as builder
 ARG PHP_EXT_ESSENTIAL
 ARG PHP_EXT_FOLDER
 
+# yaml is everywhere these days
+RUN export MAKEFLAGS="-j $(nproc)" && pecl install yaml-2.2.3
+
+# APCu
+RUN export MAKEFLAGS="-j $(nproc)" && pecl install apcu-5.1.22
+
 # Extensions that need building for fast Google APIs. This takes a while.
 # https://pecl.php.net/package/grpc
-RUN export MAKEFLAGS="-j $(nproc)" && pecl install grpc-1.58.0
+RUN export MAKEFLAGS="-j $(nproc)" && pecl install grpc-1.59.1
+
 # https://pecl.php.net/package/protobuf
-RUN export MAKEFLAGS="-j $(nproc)" && pecl install protobuf-3.24.3
+# PHP 7.4 is limited to 3.24.x
+RUN export MAKEFLAGS="-j $(nproc)" && pecl install protobuf-`php -r "echo PHP_MAJOR_VERSION < 8 ? '3.24.4' : '3.25.0';"`
 
 # Memcached & Redis
 RUN export MAKEFLAGS="-j $(nproc)" && pecl install memcached redis
