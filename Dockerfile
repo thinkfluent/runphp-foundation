@@ -1,17 +1,18 @@
 # Extensions we'd like to add by default
 ARG PHP_EXT_ESSENTIAL="bcmath opcache mysqli pdo_mysql bz2 soap sockets zip"
 
-# Where do all the PHP extensions go?
-ARG BUILD_PHP_VER="7.4.33"
-ARG PHP_EXT_FOLDER="/usr/local/lib/php/extensions/no-debug-non-zts-20190902/"
-
+# Default PHP version
+ARG BUILD_PHP_VER="8.3.0"
 ARG TAG_NAME="dev-master"
 
 ################################################################################################################
-FROM php:${BUILD_PHP_VER}-apache as baseline
+FROM php:${BUILD_PHP_VER}-apache-bullseye as baseline
 
 # Let's get up to date
 RUN apt-get update && apt-get -y upgrade
+
+# Set up a PHP extension symlink to the current folder (varies with PHP versions)
+RUN ln -s /usr/local/lib/php/extensions/$(ls -1 /usr/local/lib/php/extensions) /usr/local/lib/php/extensions/current
 
 # TODO Review Libraries we're going to need at runtime vs compilation for smaller image size
 
@@ -39,7 +40,6 @@ COPY ./manifest /
 ################################################################################################################
 FROM baseline as builder
 ARG PHP_EXT_ESSENTIAL
-ARG PHP_EXT_FOLDER
 
 # yaml is everywhere these days
 RUN export MAKEFLAGS="-j $(nproc)" && pecl install yaml-2.2.3
@@ -53,13 +53,13 @@ RUN export MAKEFLAGS="-j $(nproc)" && pecl install grpc-1.59.1
 
 # https://pecl.php.net/package/protobuf
 # PHP 7.4 is limited to 3.24.x
-RUN export MAKEFLAGS="-j $(nproc)" && pecl install protobuf-`php -r "echo PHP_MAJOR_VERSION < 8 ? '3.24.4' : '3.25.0';"`
+RUN export MAKEFLAGS="-j $(nproc)" && pecl install protobuf-`php -r "echo PHP_MAJOR_VERSION < 8 ? '3.24.4' : '3.25.1';"`
 
 # Memcached & Redis
 RUN export MAKEFLAGS="-j $(nproc)" && pecl install memcached redis
 
 # Xdebug. Pinned version for PHP 7.x builds.
-RUN export MAKEFLAGS="-j $(nproc)" && pecl install xdebug`php -r "echo PHP_MAJOR_VERSION < 8 ? '-3.1.5' : '';"`
+RUN export MAKEFLAGS="-j $(nproc)" && pecl install xdebug`php -r "echo PHP_MAJOR_VERSION < 8 ? '-3.1.5' : (PHP_MINOR_VERSION > 2 ? '-3.3.0alpha3' : '');"`
 
 # Install our desired extensions available from php base image
 RUN docker-php-ext-install -j$(nproc) ${PHP_EXT_ESSENTIAL}
@@ -87,12 +87,11 @@ RUN php /runphp-foundation/bin/install-all-missing-extensions.php
 
 # Purge extension debug strings (100MB becomes 8MB)
 # See https://github.com/docker-library/php/issues/297
-RUN ls -1 ${PHP_EXT_FOLDER}*.so | xargs strip --strip-all
+RUN ls -1 /usr/local/lib/php/extensions/current/*.so | xargs strip --strip-all
 
 ################################################################################################################
 FROM baseline as runtime
 ARG PHP_EXT_ESSENTIAL
-ARG PHP_EXT_FOLDER
 ARG TAG_NAME
 
 # Make the log directory writable
@@ -102,7 +101,7 @@ RUN chmod ugo+w /var/log
 RUN apt-get install dumb-init
 
 # Pull in all the built extensions
-COPY --from=builder ${PHP_EXT_FOLDER}*.so ${PHP_EXT_FOLDER}
+COPY --from=builder /usr/local/lib/php/extensions/ /usr/local/lib/php/extensions/
 
 # Enable our base set of extensions (but not all)
 RUN docker-php-ext-enable \

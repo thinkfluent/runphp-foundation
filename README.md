@@ -8,8 +8,17 @@ This is the baseline Docker image for the [runphp](https://github.com/thinkfluen
 Local builds can be performed as follows
 
 ```bash
-./build.sh -v 7.4.33 -t dev
-./build.sh -v 8.0.30 -t dev
-./build.sh -v 8.1.25 -t dev
-./build.sh -v 8.2.12 -t dev
+docker build \
+  --build-arg TAG_NAME=dev \
+  --build-arg BUILD_PHP_VER=8.3.0 \
+  -t runphp-foundation:dev .
+```
+
+Or, for multi-arch builds
+```bash
+docker buildx build \
+  --platform linux/amd64,linux/arm64 \
+  --build-arg TAG_NAME=${RUNPHP_REV} \
+  --build-arg BUILD_PHP_VER=${BUILD_PHP_VER} \
+  -t runphp-foundation:dev .
 ```
