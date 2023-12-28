@@ -2,7 +2,7 @@
 ARG PHP_EXT_ESSENTIAL="bcmath opcache mysqli pdo_mysql bz2 soap sockets zip"
 
 # Default PHP version
-ARG BUILD_PHP_VER="8.3.0"
+ARG BUILD_PHP_VER="8.3.1"
 ARG TAG_NAME="dev-master"
 
 ################################################################################################################
@@ -42,14 +42,18 @@ FROM baseline as builder
 ARG PHP_EXT_ESSENTIAL
 
 # yaml is everywhere these days
+# https://pecl.php.net/package/yaml
+# https://github.com/php/pecl-file_formats-yaml/tags
 RUN export MAKEFLAGS="-j $(nproc)" && pecl install yaml-2.2.3
 
 # APCu
+# https://pecl.php.net/package/apcu
+# https://github.com/krakjoe/apcu/tags
 RUN export MAKEFLAGS="-j $(nproc)" && pecl install apcu-5.1.22
 
 # Extensions that need building for fast Google APIs. This takes a while.
 # https://pecl.php.net/package/grpc
-RUN export MAKEFLAGS="-j $(nproc)" && pecl install grpc-1.59.1
+RUN export MAKEFLAGS="-j $(nproc)" && pecl install grpc-1.60.0
 
 # https://pecl.php.net/package/protobuf
 # PHP 7.4 is limited to 3.24.x
@@ -59,7 +63,8 @@ RUN export MAKEFLAGS="-j $(nproc)" && pecl install protobuf-`php -r "echo PHP_MA
 RUN export MAKEFLAGS="-j $(nproc)" && pecl install memcached redis
 
 # Xdebug. Pinned version for PHP 7.x builds.
-RUN export MAKEFLAGS="-j $(nproc)" && pecl install xdebug`php -r "echo PHP_MAJOR_VERSION < 8 ? '-3.1.5' : (PHP_MINOR_VERSION > 2 ? '-3.3.0alpha3' : '');"`
+# https://xdebug.org/announcements
+RUN export MAKEFLAGS="-j $(nproc)" && pecl install xdebug`php -r "echo PHP_MAJOR_VERSION < 8 ? '-3.1.6' : (PHP_MINOR_VERSION > 2 ? '-3.3.1' : '');"`
 
 # Install our desired extensions available from php base image
 RUN docker-php-ext-install -j$(nproc) ${PHP_EXT_ESSENTIAL}
