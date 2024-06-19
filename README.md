@@ -10,7 +10,7 @@ Local builds can be performed as follows
 ```bash
 docker build \
   --build-arg TAG_NAME=dev \
-  --build-arg BUILD_PHP_VER=8.3.2 \
+  --build-arg BUILD_PHP_VER=8.3.7 \
   -t runphp-foundation:dev .
 ```
 
