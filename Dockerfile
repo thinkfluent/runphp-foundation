@@ -2,7 +2,7 @@
 ARG PHP_EXT_ESSENTIAL="bcmath opcache mysqli pdo_mysql bz2 soap sockets zip"
 
 # Default PHP version
-ARG BUILD_PHP_VER="8.3.7"
+ARG BUILD_PHP_VER="8.3.8"
 ARG TAG_NAME="dev-master"
 
 ################################################################################################################
@@ -53,12 +53,12 @@ RUN export MAKEFLAGS="-j $(nproc)" && pecl install apcu-5.1.23
 
 # Extensions that need building for fast Google APIs. This takes a while.
 # https://pecl.php.net/package/grpc
-RUN export MAKEFLAGS="-j $(nproc)" && pecl install grpc-1.63.0
+RUN export MAKEFLAGS="-j $(nproc)" && pecl install grpc-1.64.1
 
 # https://pecl.php.net/package/protobuf
 # PHP 7.4 is limited to 3.24.x
 # PHP 8.1 is limited to 3.25.x
-RUN export MAKEFLAGS="-j $(nproc)" && pecl install protobuf-`php -r "echo PHP_MAJOR_VERSION < 8 ? '3.24.4' : (PHP_MINOR_VERSION < 1 ? '3.25.3' : '4.27.0');"`
+RUN export MAKEFLAGS="-j $(nproc)" && pecl install protobuf-`php -r "echo PHP_MAJOR_VERSION < 8 ? '3.24.4' : (PHP_MINOR_VERSION < 1 ? '3.25.3' : '4.27.2');"`
 
 # Memcached & Redis
 RUN export MAKEFLAGS="-j $(nproc)" && pecl install memcached redis
