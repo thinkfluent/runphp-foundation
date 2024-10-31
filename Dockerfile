@@ -2,7 +2,7 @@
 ARG PHP_EXT_ESSENTIAL="bcmath opcache mysqli pdo_mysql bz2 soap sockets zip"
 
 # Default PHP version
-ARG BUILD_PHP_VER="8.3.12"
+ARG BUILD_PHP_VER="8.3.13"
 ARG TAG_NAME="dev-master"
 
 ################################################################################################################
@@ -58,7 +58,7 @@ RUN export MAKEFLAGS="-j $(nproc)" && pecl install grpc-1.67.0
 # https://pecl.php.net/package/protobuf
 # PHP 7.4 is limited to 3.24.x
 # PHP 8.1 is limited to 3.25.x
-RUN export MAKEFLAGS="-j $(nproc)" && pecl install protobuf-`php -r "echo PHP_MAJOR_VERSION < 8 ? '3.24.4' : (PHP_MINOR_VERSION < 1 ? '3.25.5' : '4.27.5');"`
+RUN export MAKEFLAGS="-j $(nproc)" && pecl install protobuf-`php -r "echo PHP_MAJOR_VERSION < 8 ? '3.24.4' : (PHP_MINOR_VERSION < 1 ? '3.25.5' : '4.28.3');"`
 
 # Memcached & Redis
 RUN export MAKEFLAGS="-j $(nproc)" && pecl install memcached redis
