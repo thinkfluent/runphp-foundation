@@ -2,7 +2,7 @@
 ARG PHP_EXT_ESSENTIAL="bcmath opcache mysqli pdo_mysql bz2 soap sockets zip"
 
 # Default PHP version
-ARG BUILD_PHP_VER="8.3.13"
+ARG BUILD_PHP_VER="8.4.1"
 ARG TAG_NAME="dev-master"
 
 ################################################################################################################
@@ -13,6 +13,9 @@ RUN apt-get update && apt-get -y upgrade
 
 # Set up a PHP extension symlink to the current folder (varies with PHP versions)
 RUN ln -s /usr/local/lib/php/extensions/$(ls -1 /usr/local/lib/php/extensions) /usr/local/lib/php/extensions/current
+
+# Workaround for noisy pecl E_STRICT
+RUN sed -i '1 s/^.*$/<?php error_reporting(E_ALL ^ (E_DEPRECATED));/' /usr/local/lib/php/pearcmd.php
 
 # TODO Review Libraries we're going to need at runtime vs compilation for smaller image size
 
@@ -53,7 +56,7 @@ RUN export MAKEFLAGS="-j $(nproc)" && pecl install apcu-5.1.24
 
 # Extensions that need building for fast Google APIs. This takes a while.
 # https://pecl.php.net/package/grpc
-RUN export MAKEFLAGS="-j $(nproc)" && pecl install grpc-1.67.0
+RUN export MAKEFLAGS="-j $(nproc)" && pecl install grpc-1.68.0
 
 # https://pecl.php.net/package/protobuf
 # PHP 7.4 is limited to 3.24.x
@@ -66,7 +69,7 @@ RUN export MAKEFLAGS="-j $(nproc)" && pecl install memcached redis
 # Xdebug. Pinned version for PHP 7.x builds.
 # https://xdebug.org/announcements
 # https://github.com/xdebug/xdebug/tags
-RUN export MAKEFLAGS="-j $(nproc)" && pecl install xdebug`php -r "echo PHP_MAJOR_VERSION < 8 ? '-3.1.6' : (PHP_MINOR_VERSION > 2 ? '-3.3.2' : '');"`
+RUN export MAKEFLAGS="-j $(nproc)" && pecl install xdebug`php -r "echo PHP_MAJOR_VERSION === 7 ? '-3.1.6' : (PHP_MINOR_VERSION >= 4 ? 'beta' : '-3.3.2');"`
 
 # Install our desired extensions available from php base image
 RUN docker-php-ext-install -j$(nproc) ${PHP_EXT_ESSENTIAL}
@@ -85,9 +88,9 @@ RUN docker-php-source extract && \
 # XHProf
 RUN export MAKEFLAGS="-j $(nproc)" && pecl install xhprof
 
-# opencensus, for Google Cloud Trace
-# https://pecl.php.net/package/opencensus
-RUN export MAKEFLAGS="-j $(nproc)" && pecl install opencensus-alpha
+## opencensus, for Google Cloud Trace
+## https://pecl.php.net/package/opencensus
+#RUN export MAKEFLAGS="-j $(nproc)" && pecl install opencensus-alpha
 
 # Build any remaining extensions
 RUN php /runphp-foundation/bin/install-all-missing-extensions.php

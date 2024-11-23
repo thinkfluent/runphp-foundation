@@ -9,16 +9,8 @@ Local builds can be performed as follows
 
 ```bash
 docker build \
+  --platform linux/amd64 \
   --build-arg TAG_NAME=dev \
-  --build-arg BUILD_PHP_VER=8.3.11 \
-  -t runphp-foundation:dev .
-```
-
-Or, for multi-arch builds
-```bash
-docker buildx build \
-  --platform linux/amd64,linux/arm64 \
-  --build-arg TAG_NAME=${RUNPHP_REV} \
-  --build-arg BUILD_PHP_VER=${BUILD_PHP_VER} \
+  --build-arg BUILD_PHP_VER=8.4.1 \
   -t runphp-foundation:dev .
 ```
