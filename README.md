@@ -12,5 +12,12 @@ docker build \
   --platform linux/amd64 \
   --build-arg TAG_NAME=dev \
   --build-arg BUILD_PHP_VER=8.4.2 \
+  --build-arg BUILD_FRANKENPHP_VER=1.4.0 \
   -t runphp-foundation:dev .
 ```
+
+Check the build versions
+```bash
+docker run --rm runphp-foundation:dev frankenphp -v
+```
+

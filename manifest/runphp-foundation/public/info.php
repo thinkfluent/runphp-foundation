@@ -1,5 +1,0 @@
-<?php
-/**
- * Show phpinfo();
- */
-phpinfo();
