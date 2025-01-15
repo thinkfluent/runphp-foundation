@@ -56,7 +56,9 @@ RUN export MAKEFLAGS="-j $(nproc)" && pecl install apcu-5.1.24
 
 # Extensions that need building for fast Google APIs. This takes a while.
 # https://pecl.php.net/package/grpc
-RUN export MAKEFLAGS="-j $(nproc)" && pecl install grpc-1.68.0
+## IMPORTANT - We are pinning to 1.66.0, as there seems to be asegfault bug in versions over this at the moment
+## https://github.com/grpc/grpc/issues/38184
+RUN export MAKEFLAGS="-j $(nproc)" && pecl install grpc-1.66.0
 
 # https://pecl.php.net/package/protobuf
 # PHP 7.4 is limited to 3.24.x
@@ -69,7 +71,7 @@ RUN export MAKEFLAGS="-j $(nproc)" && pecl install memcached redis
 # Xdebug. Pinned version for PHP 7.x builds.
 # https://xdebug.org/announcements
 # https://github.com/xdebug/xdebug/tags
-RUN export MAKEFLAGS="-j $(nproc)" && pecl install xdebug`php -r "echo PHP_MAJOR_VERSION === 7 ? '-3.1.6' : (PHP_MINOR_VERSION >= 4 ? '-3.4.0' : '-3.3.2');"`
+RUN export MAKEFLAGS="-j $(nproc)" && pecl install xdebug`php -r "echo PHP_MAJOR_VERSION === 7 ? '-3.1.6' : (PHP_MINOR_VERSION >= 4 ? '-3.4.1' : '-3.3.2');"`
 
 # Install our desired extensions available from php base image
 RUN docker-php-ext-install -j$(nproc) ${PHP_EXT_ESSENTIAL}
