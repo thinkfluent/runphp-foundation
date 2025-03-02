@@ -56,9 +56,11 @@ RUN export MAKEFLAGS="-j $(nproc)" && pecl install apcu-5.1.24
 
 # Extensions that need building for fast Google APIs. This takes a while.
 # https://pecl.php.net/package/grpc
-## IMPORTANT - We are pinning to 1.66.0, as there seems to be asegfault bug in versions over this at the moment
+## IMPORTANT - We are pinning to 1.66.0, as there seems to be a segfault bug in versions over this at the moment
 ## https://github.com/grpc/grpc/issues/38184
-RUN export MAKEFLAGS="-j $(nproc)" && pecl install grpc-1.66.0
+## IMPORTANT - We are pinning to 1.64.1, as there seems to be a noisy/logging bug in versions over this at the moment
+## https://github.com/grpc/grpc/issues/37178
+RUN export MAKEFLAGS="-j $(nproc)" && pecl install grpc-1.64.1
 
 # https://pecl.php.net/package/protobuf
 # PHP 7.4 is limited to 3.24.x
