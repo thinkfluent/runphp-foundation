@@ -2,7 +2,7 @@
 ARG PHP_EXT_ESSENTIAL="bcmath opcache mysqli pdo_mysql bz2 soap sockets zip"
 
 # Default PHP version
-ARG BUILD_PHP_VER="8.4.2"
+ARG BUILD_PHP_VER="8.4.5"
 ARG TAG_NAME="dev-master"
 
 ################################################################################################################
@@ -65,7 +65,7 @@ RUN export MAKEFLAGS="-j $(nproc)" && pecl install grpc-1.64.1
 # https://pecl.php.net/package/protobuf
 # PHP 7.4 is limited to 3.24.x
 # PHP 8.1 is limited to 3.25.x
-RUN export MAKEFLAGS="-j $(nproc)" && pecl install protobuf-`php -r "echo PHP_MAJOR_VERSION < 8 ? '3.24.4' : (PHP_MINOR_VERSION < 1 ? '3.25.5' : '4.29.2');"`
+RUN export MAKEFLAGS="-j $(nproc)" && pecl install protobuf-`php -r "echo PHP_MAJOR_VERSION < 8 ? '3.24.4' : (PHP_MINOR_VERSION < 1 ? '3.25.6' : '4.30.1');"`
 
 # Memcached & Redis
 RUN export MAKEFLAGS="-j $(nproc)" && pecl install memcached redis
@@ -73,7 +73,7 @@ RUN export MAKEFLAGS="-j $(nproc)" && pecl install memcached redis
 # Xdebug. Pinned version for PHP 7.x builds.
 # https://xdebug.org/announcements
 # https://github.com/xdebug/xdebug/tags
-RUN export MAKEFLAGS="-j $(nproc)" && pecl install xdebug`php -r "echo PHP_MAJOR_VERSION === 7 ? '-3.1.6' : (PHP_MINOR_VERSION >= 4 ? '-3.4.1' : '-3.3.2');"`
+RUN export MAKEFLAGS="-j $(nproc)" && pecl install xdebug`php -r "echo PHP_MAJOR_VERSION === 7 ? '-3.1.6' : (PHP_MINOR_VERSION >= 4 ? '-3.4.2' : '-3.3.2');"`
 
 # Install our desired extensions available from php base image
 RUN docker-php-ext-install -j$(nproc) ${PHP_EXT_ESSENTIAL}
