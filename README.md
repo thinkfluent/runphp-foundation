@@ -11,6 +11,6 @@ Local builds can be performed as follows
 docker build \
   --platform linux/amd64 \
   --build-arg TAG_NAME=dev \
-  --build-arg BUILD_PHP_VER=8.4.4 \
+  --build-arg BUILD_PHP_VER=8.4.6 \
   -t runphp-foundation:dev .
 ```
