@@ -2,7 +2,7 @@
 ARG PHP_EXT_ESSENTIAL="bcmath opcache mysqli pdo_mysql bz2 soap sockets zip"
 
 # Default PHP version
-ARG BUILD_PHP_VER="8.4.7"
+ARG BUILD_PHP_VER="8.4.8"
 ARG TAG_NAME="dev-master"
 
 ################################################################################################################
@@ -57,9 +57,9 @@ RUN export MAKEFLAGS="-j $(nproc)" && pecl install apcu-5.1.24
 
 # Extensions that need building for fast Google APIs. This takes a while.
 # https://pecl.php.net/package/grpc
-## IMPORTANT - We are pinning to 1.66.0, as there seems to be a segfault bug in versions over this at the moment
+## IMPORTANT - We are pinning to 1.66.0, as there seems to be a segfault bug in versions over this
 ## https://github.com/grpc/grpc/issues/38184
-## IMPORTANT - We are pinning to 1.64.1, as there seems to be a noisy/logging bug in versions over this at the moment
+## IMPORTANT - We are further pinning to 1.64.1, as there seems to be a noisy/logging bug in versions over this
 ## https://github.com/grpc/grpc/issues/37178
 RUN export MAKEFLAGS="-j $(nproc)" && pecl install grpc-1.64.1
 
