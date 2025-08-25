@@ -2,7 +2,7 @@
 ARG PHP_EXT_ESSENTIAL="bcmath opcache mysqli pdo_mysql bz2 soap sockets zip"
 
 # Default PHP version
-ARG BUILD_PHP_VER="8.4.8"
+ARG BUILD_PHP_VER="8.4.11"
 ARG TAG_NAME="dev-master"
 
 ################################################################################################################
@@ -48,12 +48,12 @@ ARG PHP_EXT_ESSENTIAL
 # yaml is everywhere these days
 # https://pecl.php.net/package/yaml
 # https://github.com/php/pecl-file_formats-yaml/tags
-RUN export MAKEFLAGS="-j $(nproc)" && pecl install yaml-2.2.4
+RUN export MAKEFLAGS="-j $(nproc)" && pecl install yaml-2.2.5
 
 # APCu
 # https://pecl.php.net/package/apcu
 # https://github.com/krakjoe/apcu/tags
-RUN export MAKEFLAGS="-j $(nproc)" && pecl install apcu-5.1.24
+RUN export MAKEFLAGS="-j $(nproc)" && pecl install apcu-5.1.26
 
 # Extensions that need building for fast Google APIs. This takes a while.
 # https://pecl.php.net/package/grpc
@@ -66,7 +66,7 @@ RUN export MAKEFLAGS="-j $(nproc)" && pecl install grpc-1.64.1
 # https://pecl.php.net/package/protobuf
 # PHP 7.4 is limited to 3.24.x
 # PHP 8.1 is limited to 3.25.x
-RUN export MAKEFLAGS="-j $(nproc)" && pecl install protobuf-`php -r "echo PHP_MAJOR_VERSION < 8 ? '3.24.4' : (PHP_MINOR_VERSION < 1 ? '3.25.8' : '4.31.1');"`
+RUN export MAKEFLAGS="-j $(nproc)" && pecl install protobuf-`php -r "echo PHP_MAJOR_VERSION < 8 ? '3.24.4' : (PHP_MINOR_VERSION < 1 ? '3.25.8' : '4.32.0');"`
 
 # Memcached & Redis
 RUN export MAKEFLAGS="-j $(nproc)" && pecl install memcached redis
@@ -74,7 +74,7 @@ RUN export MAKEFLAGS="-j $(nproc)" && pecl install memcached redis
 # Xdebug. Pinned version for PHP 7.x builds.
 # https://xdebug.org/announcements
 # https://github.com/xdebug/xdebug/tags
-RUN export MAKEFLAGS="-j $(nproc)" && pecl install xdebug`php -r "echo PHP_MAJOR_VERSION === 7 ? '-3.1.6' : (PHP_MINOR_VERSION >= 4 ? '-3.4.3' : '-3.3.2');"`
+RUN export MAKEFLAGS="-j $(nproc)" && pecl install xdebug`php -r "echo PHP_MAJOR_VERSION === 7 ? '-3.1.6' : (PHP_MINOR_VERSION >= 4 ? '-3.4.5' : '-3.3.2');"`
 
 # Install our desired extensions available from php base image
 RUN docker-php-ext-install -j$(nproc) ${PHP_EXT_ESSENTIAL}
