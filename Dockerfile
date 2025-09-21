@@ -2,12 +2,12 @@
 ARG PHP_EXT_ESSENTIAL="bcmath opcache mysqli pdo_mysql bz2 soap sockets zip"
 
 # Default PHP version
-ARG BUILD_PHP_VER="8.4.11"
+ARG BUILD_PHP_VER="8.4.12"
+ARG BUILD_PHP_VER_DEB="apache-bookworm"
 ARG TAG_NAME="dev-master"
 
 ################################################################################################################
-# TODO switch to bookworm
-FROM php:${BUILD_PHP_VER}-apache-bullseye as baseline
+FROM php:${BUILD_PHP_VER}-${BUILD_PHP_VER_DEB} as baseline
 
 # Let's get up to date
 RUN apt-get update && apt-get -y upgrade
@@ -53,20 +53,18 @@ RUN export MAKEFLAGS="-j $(nproc)" && pecl install yaml-2.2.5
 # APCu
 # https://pecl.php.net/package/apcu
 # https://github.com/krakjoe/apcu/tags
-RUN export MAKEFLAGS="-j $(nproc)" && pecl install apcu-5.1.26
+RUN export MAKEFLAGS="-j $(nproc)" && pecl install apcu-5.1.27
 
 # Extensions that need building for fast Google APIs. This takes a while.
 # https://pecl.php.net/package/grpc
-## IMPORTANT - We are pinning to 1.66.0, as there seems to be a segfault bug in versions over this
+## IMPORTANT - We set zend.max_allowed_stack_size=-1 to avoid errors. See:
 ## https://github.com/grpc/grpc/issues/38184
-## IMPORTANT - We are further pinning to 1.64.1, as there seems to be a noisy/logging bug in versions over this
-## https://github.com/grpc/grpc/issues/37178
-RUN export MAKEFLAGS="-j $(nproc)" && pecl install grpc-1.64.1
+RUN export MAKEFLAGS="-j $(nproc)" && pecl install grpc-1.75.0
 
 # https://pecl.php.net/package/protobuf
 # PHP 7.4 is limited to 3.24.x
 # PHP 8.1 is limited to 3.25.x
-RUN export MAKEFLAGS="-j $(nproc)" && pecl install protobuf-`php -r "echo PHP_MAJOR_VERSION < 8 ? '3.24.4' : (PHP_MINOR_VERSION < 1 ? '3.25.8' : '4.32.0');"`
+RUN export MAKEFLAGS="-j $(nproc)" && pecl install protobuf-`php -r "echo PHP_MAJOR_VERSION < 8 ? '3.24.4' : (PHP_MINOR_VERSION < 1 ? '3.25.8' : '4.32.1');"`
 
 # Memcached & Redis
 RUN export MAKEFLAGS="-j $(nproc)" && pecl install memcached redis
