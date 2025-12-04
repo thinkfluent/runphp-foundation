@@ -2,7 +2,7 @@
 ARG PHP_EXT_ESSENTIAL="bcmath opcache mysqli pdo_mysql bz2 soap sockets zip"
 
 # Default PHP version
-ARG BUILD_PHP_VER="8.4.14"
+ARG BUILD_PHP_VER="8.4.15"
 ARG BUILD_PHP_VER_DEB="apache-bookworm"
 ARG TAG_NAME="dev-master"
 
