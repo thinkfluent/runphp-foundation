@@ -1,8 +1,8 @@
-# Extensions we'd like to add by default
-ARG PHP_EXT_ESSENTIAL="bcmath opcache mysqli pdo_mysql bz2 soap sockets zip"
+# Extensions we'd like to add by default. Opcache always added below for < 8.5
+ARG PHP_EXT_ESSENTIAL="bcmath mysqli pdo_mysql bz2 soap sockets zip"
 
 # Default PHP version
-ARG BUILD_PHP_VER="8.4.15"
+ARG BUILD_PHP_VER="8.5.1"
 ARG BUILD_PHP_VER_DEB="apache-bookworm"
 ARG TAG_NAME="dev-master"
 
@@ -53,7 +53,7 @@ RUN export MAKEFLAGS="-j $(nproc)" && pecl install yaml-2.3.0
 # APCu
 # https://pecl.php.net/package/apcu
 # https://github.com/krakjoe/apcu/tags
-RUN export MAKEFLAGS="-j $(nproc)" && pecl install apcu-5.1.27
+RUN export MAKEFLAGS="-j $(nproc)" && pecl install apcu-5.1.28
 
 # Extensions that need building for fast Google APIs. This takes a while.
 # https://pecl.php.net/package/grpc
@@ -64,7 +64,7 @@ RUN export MAKEFLAGS="-j $(nproc)" && pecl install grpc-1.76.0
 # https://pecl.php.net/package/protobuf
 # PHP 7.4 is limited to 3.24.x
 # PHP 8.1 is limited to 3.25.x
-RUN export MAKEFLAGS="-j $(nproc)" && pecl install protobuf-`php -r "echo PHP_MAJOR_VERSION < 8 ? '3.24.4' : (PHP_MINOR_VERSION < 1 ? '3.25.8' : '4.33.1');"`
+RUN export MAKEFLAGS="-j $(nproc)" && pecl install protobuf-`php -r "echo PHP_MAJOR_VERSION < 8 ? '3.24.4' : (PHP_MINOR_VERSION < 1 ? '3.25.8' : '4.33.2');"`
 
 # Memcached & Redis
 RUN export MAKEFLAGS="-j $(nproc)" && pecl install memcached redis
@@ -72,10 +72,10 @@ RUN export MAKEFLAGS="-j $(nproc)" && pecl install memcached redis
 # Xdebug. Pinned version for PHP 7.x builds.
 # https://xdebug.org/announcements
 # https://github.com/xdebug/xdebug/tags
-RUN export MAKEFLAGS="-j $(nproc)" && pecl install xdebug`php -r "echo PHP_MAJOR_VERSION === 7 ? '-3.1.6' : (PHP_MINOR_VERSION >= 4 ? '-3.4.7' : '-3.3.2');"`
+RUN export MAKEFLAGS="-j $(nproc)" && pecl install xdebug`php -r "echo PHP_MAJOR_VERSION === 7 ? '-3.1.6' : (PHP_MINOR_VERSION >= 4 ? '-3.5.0' : '-3.3.2');"`
 
 # Install our desired extensions available from php base image
-RUN docker-php-ext-install -j$(nproc) ${PHP_EXT_ESSENTIAL}
+RUN docker-php-ext-install -j$(nproc) `php -r "echo PHP_VERSION_ID < 80500 ? 'opcache' : '';"` ${PHP_EXT_ESSENTIAL}
 
 # We'd like GD with some extras...
 RUN docker-php-source extract && \
@@ -124,7 +124,7 @@ RUN docker-php-ext-enable \
     redis \
     gd \
     xhprof \
-    ${PHP_EXT_ESSENTIAL}
+    ${PHP_EXT_ESSENTIAL} `php -r "echo PHP_VERSION_ID < 80500 ? 'opcache' : '';"`
 
 # Ensure we listen on the runtime $PORT value
 RUN sed -i 's/80/${PORT}/g' /etc/apache2/sites-available/000-default.conf /etc/apache2/ports.conf
