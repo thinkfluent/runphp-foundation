@@ -6,6 +6,14 @@ ARG BUILD_PHP_VER="8.5.12"
 ARG BUILD_PHP_VER_DEB="apache-trixie"
 ARG TAG_NAME="dev-master"
 
+# Pinned PECL extension versions, overridable at build time.
+ARG BUILD_YAML_VER="2.3.0"
+ARG BUILD_APCU_VER="5.1.28"
+ARG BUILD_GRPC_VER="1.84.0"
+ARG BUILD_PROTOBUF_VER="5.36.2"
+# BUILD_XDEBUG_VER keeps the leading '-' its pecl install line composes
+ARG BUILD_XDEBUG_VER="-3.5.3"
+
 ################################################################################################################
 FROM php:${BUILD_PHP_VER}-${BUILD_PHP_VER_DEB} as baseline
 
@@ -44,28 +52,33 @@ COPY ./manifest /
 ################################################################################################################
 FROM baseline as builder
 ARG PHP_EXT_ESSENTIAL
+ARG BUILD_YAML_VER
+ARG BUILD_APCU_VER
+ARG BUILD_GRPC_VER
+ARG BUILD_PROTOBUF_VER
+ARG BUILD_XDEBUG_VER
 
 # yaml is everywhere these days
 # https://pecl.php.net/package/yaml
 # https://github.com/php/pecl-file_formats-yaml/tags
-RUN export MAKEFLAGS="-j $(nproc)" && pecl install yaml-2.3.0
+RUN export MAKEFLAGS="-j $(nproc)" && pecl install yaml-$BUILD_YAML_VER
 
 # APCu
 # https://pecl.php.net/package/apcu
 # https://github.com/krakjoe/apcu/tags
-RUN export MAKEFLAGS="-j $(nproc)" && pecl install apcu-5.1.28
+RUN export MAKEFLAGS="-j $(nproc)" && pecl install apcu-$BUILD_APCU_VER
 
 # Extensions that need building for fast Google APIs. This takes a while.
 # https://pecl.php.net/package/grpc
 ## IMPORTANT - We set zend.max_allowed_stack_size=-1 to avoid errors. See:
 ## https://github.com/grpc/grpc/issues/38184
-RUN export MAKEFLAGS="-j $(nproc)" && pecl install grpc-1.84.0
+RUN export MAKEFLAGS="-j $(nproc)" && pecl install grpc-$BUILD_GRPC_VER
 
 # https://pecl.php.net/package/protobuf
 # PHP 7.4 is limited to 3.24.x
 # PHP 8.0 is limited to 3.25.x
 # PHP 8.1 is limited to 4.33.x
-RUN export MAKEFLAGS="-j $(nproc)" && pecl install protobuf-`php -r "echo PHP_VERSION_ID < 80000 ? '3.24.4' : (PHP_VERSION_ID < 80100 ? '3.25.9' : (PHP_VERSION_ID < 80200 ? '4.33.6' : '5.36.2'));"`
+RUN export MAKEFLAGS="-j $(nproc)" && pecl install protobuf-`php -r "echo PHP_VERSION_ID < 80000 ? '3.24.4' : (PHP_VERSION_ID < 80100 ? '3.25.9' : (PHP_VERSION_ID < 80200 ? '4.33.6' : '$BUILD_PROTOBUF_VER'));"`
 
 # Memcached & Redis
 RUN export MAKEFLAGS="-j $(nproc)" && pecl install memcached redis
@@ -76,7 +89,7 @@ RUN export MAKEFLAGS="-j $(nproc)" && pecl install igbinary
 # Xdebug. Pinned version for PHP 7.x builds.
 # https://xdebug.org/announcements
 # https://github.com/xdebug/xdebug/tags
-RUN export MAKEFLAGS="-j $(nproc)" && pecl install xdebug`php -r "echo PHP_MAJOR_VERSION === 7 ? '-3.1.6' : (PHP_MINOR_VERSION >= 4 ? '-3.5.3' : '-3.3.2');"`
+RUN export MAKEFLAGS="-j $(nproc)" && pecl install xdebug`php -r "echo PHP_MAJOR_VERSION === 7 ? '-3.1.6' : (PHP_MINOR_VERSION >= 4 ? '$BUILD_XDEBUG_VER' : '-3.3.2');"`
 
 # Install our desired extensions available from php base image
 RUN docker-php-ext-install -j$(nproc) `php -r "echo PHP_VERSION_ID < 80500 ? 'opcache' : '';"` ${PHP_EXT_ESSENTIAL}
